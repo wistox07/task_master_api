@@ -11,24 +11,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use OpenApi\Annotations as OA;
+
 
 
 /**
  * @OA\Info(
- *      version="1.0.0",
- *      title="API de Tareas",
- *      description="Documentación de la API de tareas",
- *      @OA\Contact(
- *          email="soporte@tudominio.com"
- *      ),
+ *     title="API de Tareas",
+ *     version="1.0",
+ *     description="Documentación de la API para la gestión de tareas."
  * )
  * 
  * @OA\Server(
- *      url="http://localhost:8000",
- *      description="Servidor de desarrollo"
+ *     url=L5_SWAGGER_CONST_HOST,
+ *     description="Servidor API principal"
  * )
- *
- * @OA\PathItem(path="/api/tasks")
  */
 
 
@@ -39,19 +36,12 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+
     public function listTasks(Request $request)
     {
-        /**
-         * @OA\Get(
-         *     path="/api/tasks",
-         *     summary="Lista todas las tareas",
-         *     tags={"Tasks"},
-         *     @OA\Response(
-         *         response=200,
-         *         description="Lista de tareas"
-         *     )
-         * )
-         */
+
 
         try {
 
@@ -95,6 +85,9 @@ class TaskController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -266,6 +259,61 @@ class TaskController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
+     */
+
+    /**
+     * @OA\Delete(
+     *     path="/tasks/{id}",
+     *     summary="Eliminar una tarea",
+     *     tags={"Tareas"},
+     *     security={{ "bearerAuth": {} }},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la tarea a eliminar",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tarea eliminada correctamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Tarea eliminada correctamente")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuario no autorizado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Usuario no encontrado"),
+     *             @OA\Property(property="message_detail", type="string", example="No fue posible encontrar al usuario logueado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Tarea no encontrada",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Tarea no encontrada"),
+     *             @OA\Property(property="message_detail", type="string", example="No fue posible encontrar la tarea solicitada")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error al eliminar la tarea",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Error al eliminar la tarea"),
+     *             @OA\Property(property="message_detail", type="string", example="Detalle del error")
+     *         )
+     *     )
+     * )
      */
     public function destroy(Request $request, $id)
     {

@@ -2,19 +2,141 @@
     "openapi": "3.0.0",
     "info": {
         "title": "API de Tareas",
-        "description": "Documentación de la API de tareas",
-        "contact": {
-            "email": "soporte@tudominio.com"
-        },
-        "version": "1.0.0"
+        "description": "Documentación de la API para la gestión de tareas.",
+        "version": "1.0"
     },
     "servers": [
         {
-            "url": "http://localhost:8000",
-            "description": "Servidor de desarrollo"
+            "url": "http://my-default-host.com",
+            "description": "Servidor API principal"
         }
     ],
     "paths": {
-        "/api/tasks": {}
-    }
+        "/tasks/{id}": {
+            "delete": {
+                "tags": [
+                    "Tareas"
+                ],
+                "summary": "Eliminar una tarea",
+                "operationId": "158a5fa05e059c587ac4466c6b23008b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la tarea a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tarea eliminada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tarea eliminada correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Usuario no autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "No fue posible encontrar al usuario logueado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tarea no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tarea no encontrada"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "No fue posible encontrar la tarea solicitada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error al eliminar la tarea",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al eliminar la tarea"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Detalle del error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Tareas",
+            "description": "Tareas"
+        }
+    ]
 }
