@@ -9,4 +9,8 @@ class Status extends Model
 {
     use HasFactory;
 
+    public function tasks(){
+        return $this->hasMany(Task::class, "status_id","id");
+    }
+
 }

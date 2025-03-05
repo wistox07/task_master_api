@@ -4,7 +4,11 @@ namespace App\Http\Controllers\api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
+use Throwable;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskController extends Controller
 {
@@ -13,12 +17,32 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function listTasks(Request $request)
     {
-        
+        try {
 
-        return response()->json(Task::all());
+            $token = $request->header("token");
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $userIdLogued = $payload->get("sub");
+    
+            $user = User::find($userIdLogued);
+            if(!$user){
+                 throw new Exception("Usuario no encontrado");
+            }
 
+            $tasks = $user->tasks()->with('status')->get();
+            return response()->json([
+                "error" => false,
+                "data" => $tasks
+            ]); 
+
+        }catch(Throwable $ex){
+            return response()->json([
+                "error" => true,
+                "message" => "Se presentó un problema en el proceso de listar tareas",
+                "message_detail" => $ex->getMessage()
+            ],500);
+        }
     }
 
     /**
@@ -49,10 +73,36 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request , $id)
     {
-        return response()->json($id);
+       
+        try {
 
+            $token = $request->header("token");
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $userIdLogued = $payload->get("sub");
+    
+            $user = User::find($userIdLogued);
+            if(!$user){
+                 throw new Exception("Usuario no encontrado");
+            }
+
+            $task = $user->tasks()->with('status')->find($id);
+            if(!$task){
+                throw new Exception("Tarea no encontrada");
+            }
+            return response()->json([
+                "error" => false,
+                "data" => $task
+            ]); 
+
+        }catch(Throwable $ex){
+            return response()->json([
+                "error" => true,
+                "message" => "Se presentó un problema en el proceso de listar la tarea",
+                "message_detail" => $ex->getMessage()
+            ],500);
+        }
     }
 
 

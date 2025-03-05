@@ -42,7 +42,7 @@ class AuthController extends Controller
                     "error" => true,
                     "message" => "Usuario no encontrado",
                     "message_detail" => "El usuario ingresado no se encuentra registrado"
-                ]);
+                ],400);
             }
 
             if(!Hash::check($password, $user->password)){
@@ -56,7 +56,7 @@ class AuthController extends Controller
             $token = JWTAuth::fromUser($user);
 
             return response()->json([
-                "success" => true,
+                "error" => false,
                 "data" => $user,
                 "token" => $token
             ]);

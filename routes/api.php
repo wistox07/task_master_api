@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\api\v1\AuthController;
 use App\Http\Controllers\api\v1\TaskController;
+use App\Http\Controllers\api\v1\UserController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +28,10 @@ Route::prefix("v1")->group(function () {
     });
 
     Route::prefix("tasks")->middleware("validate.token")->group(function () {
-        Route::apiResource('tasks', TaskController::class);
-        Route::get('tasks/me', [TaskController::class, '']);
+        Route::get('/me', [TaskController::class, 'listTasks']);
     });
+
+    Route::apiResource('/tasks', TaskController::class);
+
 });
 
