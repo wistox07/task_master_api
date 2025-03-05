@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string("title");
             $table->string("description");
-            $table->dateTime("expiration_date");
+            $table->date("expiration_date");
             $table->foreignId("user_id")->constrained("users")->onDelete("cascade")->onUpdate("cascade");
             $table->timestamps();
         });

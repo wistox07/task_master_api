@@ -13,8 +13,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request){
-        $validator = Validator::make($request->all(),[
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             "email" => "required|email",
             "password" => [
                 "required",
@@ -22,12 +23,12 @@ class AuthController extends Controller
             ]
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 "error" => true,
                 "message" => "Error en validación",
                 "message_detail" => $validator->errors()->all()
-            ],400);
+            ], 400);
         }
 
         $email = $request->input("email");
@@ -35,17 +36,17 @@ class AuthController extends Controller
 
 
         try {
-            
+
             $user = User::where("email", $email)->first();
-            if(!$user){
+            if (!$user) {
                 return response()->json([
                     "error" => true,
                     "message" => "Usuario no encontrado",
                     "message_detail" => "El usuario ingresado no se encuentra registrado"
-                ],400);
+                ], 400);
             }
 
-            if(!Hash::check($password, $user->password)){
+            if (!Hash::check($password, $user->password)) {
                 return response()->json([
                     "error" => true,
                     "message" => "Credenciales incorrectas",
@@ -57,24 +58,26 @@ class AuthController extends Controller
 
             return response()->json([
                 "error" => false,
-                "data" => $user,
+                "message" => "Inicio de sesión exitoso",
+                "user" => [
+                    "name" => $user->name,
+                    "email" => $user->email,
+                ],
                 "token" => $token
             ]);
-            
-
-        }catch(Throwable $ex){
+        } catch (Throwable $ex) {
             return response()->json([
                 "error" => true,
-                "message" => "Se presentó un problema en el proceso de registro",
+                "message" => "Error en el proceso de logueo",
                 "message_detail" => $ex->getMessage()
-            ],500);
+            ], 500);
         }
-
     }
 
-    public function register(Request $request){
+    public function register(Request $request)
+    {
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             "email" => "required|email|unique:users",
             "name" => "required|string",
             "password" => [
@@ -83,43 +86,40 @@ class AuthController extends Controller
             ]
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 "error" => true,
                 "message" => "Error en validación",
                 "message_detail" => $validator->errors()->all()
-            ],400);
+            ], 400);
         }
-        
+
         $email = $request->input("email");
         $password = $request->input("password");
         $name = $request->input("name");
 
-        try{
+        try {
             $user = User::create([
                 "name" => $name,
                 "email" => $email,
-                "password" => $password
+                "password" => Hash::make($password)
             ]);
 
             return response()->json([
                 "error" => false,
-                "message" => "Usuario registrado",
-                "message_detail" => "El usuario se ha registrado correctamente",
-                "data" => [
+                "message" => "Registro de Usuario exitoso",
+                "user" => [
                     "name" => $user->name,
-                    "email" => $user->email
+                    "email" => $user->email,
+                    "fecha_creacion" => $user->created_at->format("Y-m-d H:i:s")
                 ]
-            ], 201); 
-
-        }catch(Throwable $ex){
+            ]);
+        } catch (Throwable $ex) {
             return response()->json([
                 "error" => true,
-                "message" => "Se presentó un problema en el proceso de registro",
+                "message" => "Error en el proceso de registro",
                 "message_detail" => $ex->getMessage()
-            ],500);
+            ], 500);
         }
-
-
     }
 }

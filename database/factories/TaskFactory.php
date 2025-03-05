@@ -19,7 +19,7 @@ class TaskFactory extends Factory
         return [
             "title" => fake()->sentence(3),
             "description" => fake()->paragraph(3),
-            "expiration_date" =>  fake()->dateTimeBetween('+10 days', '+1 month'), 
+            "expiration_date" =>  fake()->dateTimeBetween('+10 days', '+1 month')->format('Y-m-d'),
         ];
     }
 }

@@ -27,11 +27,8 @@ Route::prefix("v1")->group(function () {
         Route::post("login", [AuthController::class, "login"]);
     });
 
-    Route::prefix("tasks")->middleware("validate.token")->group(function () {
-        Route::get('/me', [TaskController::class, 'listTasks']);
+    Route::middleware('validate.token')->group(function () {
+        Route::get("tasks/me", [TaskController::class, 'listTasks']);
+        Route::apiResource('/tasks', TaskController::class);
     });
-
-    Route::apiResource('/tasks', TaskController::class);
-
 });
-
