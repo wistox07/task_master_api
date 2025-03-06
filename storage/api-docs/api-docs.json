@@ -1,33 +1,897 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API de Tareas",
+        "title": "API task_master_api",
         "description": "Documentación de la API para la gestión de tareas.",
         "version": "1.0"
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://task_master_api.test/api",
+            "description": "Servidor API principal"
+        },
+        {
+            "url": "http://task_master_api.test/api",
             "description": "Servidor API principal"
         }
     ],
     "paths": {
-        "/tasks/{id}": {
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Iniciar sesión",
+                "description": "Autentica a un usuario con correo y contraseña, devolviendo un token JWT.",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inicio de sesión exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Inicio de sesión exitoso"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Juan Pérez"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "usuario@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error en validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en validación"
+                                        },
+                                        "message_detail": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "example": [
+                                                "El campo email es obligatorio.",
+                                                "El campo password es obligatorio."
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "El usuario ingresado no se encuentra registrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Credenciales incorrectas"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Las credenciales ingresadas son incorrectas"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error en el proceso de logueo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en el proceso de logueo"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Mensaje de error interno"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Registrar un nuevo usuario",
+                "description": "Crea una nueva cuenta de usuario con nombre, email y contraseña.",
+                "operationId": "register",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "name",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@example.com"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registro exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registro de Usuario exitoso"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Juan Pérez"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "usuario@example.com"
+                                                },
+                                                "fecha_creacion": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-03-05 14:30:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error en validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en validación"
+                                        },
+                                        "message_detail": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "example": [
+                                                "El campo email es obligatorio.",
+                                                "El campo name es obligatorio",
+                                                "El campo password es obligatorio."
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error en el proceso de registro",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en el proceso de registro"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Mensaje de error interno"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/me": {
+            "get": {
+                "tags": [
+                    "Tareas"
+                ],
+                "summary": "Obtener lista de tareas del usuario autenticado",
+                "description": "Retorna una lista de tareas asociadas al usuario autenticado, requiere un token JWT en los headers.",
+                "operationId": "c02a2365a23f8778d445470dc18ba37d",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "header",
+                        "description": "Token JWT del usuario autenticado",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de tareas obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lista de tareas obtenidas correctamente"
+                                        },
+                                        "tasks": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Task"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no autorizado o no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "No fue posible encontrar al usuario logueado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al listar tareas"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Detalles del error interno"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks": {
+            "post": {
+                "tags": [
+                    "Tareas"
+                ],
+                "summary": "Crear una nueva tarea",
+                "description": "Permite a un usuario autenticado crear una nueva tarea. Requiere un token JWT en los headers.",
+                "operationId": "9ea0e205383ef8526eeaa501dafd0f47",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "header",
+                        "description": "Token JWT del usuario autenticado",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description",
+                                    "expiration_date",
+                                    "status_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Revisar documentos"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Revisar y firmar los documentos del cliente"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-03-15"
+                                    },
+                                    "status_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarea creada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tarea creada correctamente"
+                                        },
+                                        "task": {
+                                            "$ref": "#/components/schemas/Task"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error en validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en validación"
+                                        },
+                                        "message_detail": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "example": [
+                                                "El campo title es obligatorio.",
+                                                "El campo description es obligatorio.",
+                                                "El campo expiration_date es obligatorio.",
+                                                "El campo status_id es obligatorio."
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no autorizado o no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "No fue posible encontrar al usuario logueado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al guardar tarea"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Detalles del error interno"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/tasks/{id}": {
+            "get": {
+                "tags": [
+                    "Tareas"
+                ],
+                "summary": "Obtiene una tarea especifica",
+                "description": "Retorna una tarea especifica asociado al usuario autenticado, requiere un token JWT en los headers.",
+                "operationId": "524a1418493eba6075c75fac54ae1afa",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "header",
+                        "description": "Token JWT del usuario autenticado",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la tarea a obtener",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tarea obtenida correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tarea obtenida correctamente"
+                                        },
+                                        "task": {
+                                            "$ref": "#/components/schemas/Task"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no autorizado o no encontrado o Tarea no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado o Tarea no encontrada"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "No fue posible encontrar registros"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al obtener la tarea"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Detalles del error interno"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Tareas"
+                ],
+                "summary": "Actualizar una tarea",
+                "description": "Permite actualizar una tarea específica de un usuario autenticado.",
+                "operationId": "412ec616fe99c8f83dd8e582ed2f6e86",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la tarea a actualizar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "header",
+                        "description": "Token JWT del usuario autenticado",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Datos para actualizar la tarea",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description",
+                                    "expiration_date",
+                                    "status_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Actualizar API"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Refactorizar el endpoint de actualización"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-31"
+                                    },
+                                    "status_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarea actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tarea actualizada correctamente"
+                                        },
+                                        "task": {
+                                            "$ref": "#/components/schemas/Task"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error en validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en validación"
+                                        },
+                                        "message_detail": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "example": [
+                                                "El campo title es obligatorio.",
+                                                "El campo description es obligatorio.",
+                                                "El campo expiration_date es obligatorio.",
+                                                "El campo status_id es obligatorio."
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no autorizado o no encontrado o Tarea no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario no encontrado o Tarea no encontrada"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "No fue posible encontrar registros"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al actualizar la tarea"
+                                        },
+                                        "message_detail": {
+                                            "type": "string",
+                                            "example": "Error interno del servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Tareas"
                 ],
                 "summary": "Eliminar una tarea",
-                "operationId": "158a5fa05e059c587ac4466c6b23008b",
+                "description": "Elimina una tarea específica asociada al usuario autenticado. Requiere un token JWT en los headers.",
+                "operationId": "4691d8720455c1973caa1e3a61288981",
                 "parameters": [
+                    {
+                        "name": "token",
+                        "in": "header",
+                        "description": "Token JWT del usuario autenticado",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "id",
                         "in": "path",
                         "description": "ID de la tarea a eliminar",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 10
+                            "type": "integer"
                         }
                     }
                 ],
@@ -52,32 +916,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Usuario no autorizado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Usuario no encontrado"
-                                        },
-                                        "message_detail": {
-                                            "type": "string",
-                                            "example": "No fue posible encontrar al usuario logueado"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
                     "404": {
-                        "description": "Tarea no encontrada",
+                        "description": "Usuario no autorizado o no encontrado o Tarea no encontrada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -88,11 +928,11 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Tarea no encontrada"
+                                            "example": "Usuario no encontrado o Tarea no encontrada"
                                         },
                                         "message_detail": {
                                             "type": "string",
-                                            "example": "No fue posible encontrar la tarea solicitada"
+                                            "example": "No fue posible encontrar registros"
                                         }
                                     },
                                     "type": "object"
@@ -101,7 +941,7 @@
                         }
                     },
                     "500": {
-                        "description": "Error al eliminar la tarea",
+                        "description": "Error interno del servidor",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -116,7 +956,7 @@
                                         },
                                         "message_detail": {
                                             "type": "string",
-                                            "example": "Detalle del error"
+                                            "example": "Detalles del error interno"
                                         }
                                     },
                                     "type": "object"
@@ -133,7 +973,47 @@
             }
         }
     },
+    "components": {
+        "schemas": {
+            "Task": {
+                "title": "Tarea",
+                "description": "Estructura de una tarea",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Deserunt ut."
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Descripción de la tarea."
+                    },
+                    "expiration_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-03-29"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "Pendiente"
+                    },
+                    "user": {
+                        "type": "string",
+                        "example": "Lucy West"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
     "tags": [
+        {
+            "name": "Autenticación",
+            "description": "Autenticación"
+        },
         {
             "name": "Tareas",
             "description": "Tareas"

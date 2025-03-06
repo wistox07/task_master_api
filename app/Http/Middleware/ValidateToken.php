@@ -28,7 +28,7 @@ class ValidateToken
                     "error" => true,
                     "message" => "Token no enviado",
                     "message_detail" => "Es necesario enviar el token para continuar con el proceso"
-                ],401);
+                ],400);
             }
 
             $payload = JWTAuth::setToken($token)->getPayload();
@@ -51,7 +51,7 @@ class ValidateToken
                 "error" => true,
                 "message" => "Problema en validación de token",
                 "message_detail" => $e->getMessage()
-            ],401);
+            ],500);
         }
     }
 }
