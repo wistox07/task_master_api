@@ -81,7 +81,7 @@ class TaskControllerTest extends TestCase
 
             Task::factory(10)->create([
                 "user_id" => $user->id,
-                "status_id" => 1
+                "status_id" => Status::inRandomOrder()->first()->id
             ]);
 
 
@@ -102,7 +102,7 @@ class TaskControllerTest extends TestCase
 
 
        //REGISTRAR TAREA
-       public function test_end_point_registrar_tareas_falla_en_validacion(){
+        public function test_end_point_registrar_tareas_falla_en_validacion(){
 
             $response = $this->postJson('/api/v1/tasks');
 
@@ -113,7 +113,20 @@ class TaskControllerTest extends TestCase
         }
 
         public function test_end_point_registrar_tarea_falla_en_usuario_inexistente(){
-            
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
+    
+                ]
+            ]);
+
             $user = User::factory()->create([
                 "email" => 'test@test.com',
                 "name" => "test",
@@ -130,7 +143,7 @@ class TaskControllerTest extends TestCase
                 "title" => "prueba",
                 "description" => "prueba",
                 "expiration_date" => "2025-01-01",
-                "status_id" => 1
+                "status_id" => Status::inRandomOrder()->first()->id
             ]);
 
 
@@ -140,68 +153,443 @@ class TaskControllerTest extends TestCase
             ]);
         }
 
+        public function test_end_point_registrar_tarea_correcto(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
+    
+                ]
+            ]);
+           
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->postJson('/api/v1/tasks',[
+                "title" => "prueba",
+                "description" => "prueba",
+                "expiration_date" => "2025-01-01",
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $response->assertStatus(200)
+            ->assertJsonStructure(['task'])
+            ->assertJson([
+              "error" => false,
+          ]);
+          
+        }
+
+
+        //OBTIENE TAREA EN  ESPECIFICO
+        public function test_end_point_obtener_tarea_falla_en_validacion(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
+    
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->get("/api/v1/tasks/$taskId");
+
+            $response->assertStatus(400)
+            ->assertJson([
+                "error" => true,
+            ]);
+        }
+
+        public function test_end_point_obtener_tarea_falla_en_usuario_inexistente(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
+    
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $user->delete();
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->get("/api/v1/tasks/$taskId");
+
+
+            $response->assertStatus(404)
+            ->assertJson([
+                "error" => true,
+            ]);
+        }
+
+        public function test_end_point_obtener_tarea_correcto(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
+    
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->get("/api/v1/tasks/$taskId");
+
+
+            $response->assertStatus(200)
+            ->assertJsonStructure(['task'])
+            ->assertJson([
+              "error" => false,
+          ]);
+        }
+
+        //ACTUALIZA UNA TAREA EN ESPECIFICO
+        public function test_end_point_actualizar_tarea_falla_en_validacion(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
+    
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->put("/api/v1/tasks/$taskId",[
+                "title" => "prueba",
+                "description" => "prueba",
+                "expiration_date" => "2025-01-01",
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $response->assertStatus(400)
+            ->assertJson([
+                "error" => true,
+            ]);
+        }
         
-        /*
-         public function test_login_falla_en_usuario_inexistente(){
+        public function test_end_point_actualizar_tarea_falla_en_usuario_inexistente(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
     
+                ]
+            ]);
+
             $user = User::factory()->create([
                 "email" => 'test@test.com',
                 "name" => "test",
                 "password" => Hash::make("12345678"),
             ]);
-    
-            $response = $this->postJson('/api/v1/auth/login', [
-                'email' => 'test1@test.com',
-                'password' => '12345678',
-            ]);     
-    
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $user->delete();
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->put("/api/v1/tasks/$taskId",[
+                "title" => "prueba",
+                "description" => "prueba",
+                "expiration_date" => "2025-01-01",
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+
             $response->assertStatus(404)
             ->assertJson([
                 "error" => true,
-            ]);;
-    
+            ]);
         }
+        
+        public function test_end_point_actualizar_tarea_correcto(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
     
-        public function test_login_falla_en_password_incorrecto(){
-    
+                ]
+            ]);
+
             $user = User::factory()->create([
                 "email" => 'test@test.com',
                 "name" => "test",
                 "password" => Hash::make("12345678"),
             ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->put("/api/v1/tasks/$taskId",[
+                "title" => "prueba",
+                "description" => "prueba",
+                "expiration_date" => "2025-01-01",
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+
+            $response->assertStatus(200)
+            ->assertJsonStructure(['task'])
+            ->assertJson([
+              "error" => false,
+          ]);
+        }
+
+        //ELIMINA TAREA EN  ESPECIFICO
+        public function test_end_point_eliminar_tarea_falla_en_validacion(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
     
-            $response = $this->postJson('/api/v1/auth/login', [
-                'email' => 'test1@test.com',
-                'password' => '123456789',
-            ]);     
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->delete("/api/v1/tasks/$taskId");
+
+            $response->assertStatus(400)
+            ->assertJson([
+                "error" => true,
+            ]);
+        }
+        
+        public function test_end_point_eliminar_tarea_falla_en_usuario_inexistente(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
     
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $user->delete();
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->delete("/api/v1/tasks/$taskId");
+
+
             $response->assertStatus(404)
             ->assertJson([
                 "error" => true,
-            ]);;
-    
+            ]);
         }
+        
+
+        public function test_end_point_eliminar_tarea_correcto(){
+
+            Status::factory()->createMany([
+                [
+                    "name" => "Pendiente",
+                    "description" => "Estado Pendiente",
+                    "identifier_code" => "pending_status"
+                ],
+                [
+                    "name" => "Completada",
+                    "description" => "Estado Completada",
+                    "identifier_code" => "completed_status"
     
-    
-        public function test_login_correcto(){
-             $user = User::factory()->create([
-                 "email" => 'test@test.com',
-                 "name" => "test",
-                 "password" => Hash::make("12345678"),
-             ]);
-     
-             $response = $this->postJson('/api/v1/auth/login', [
-                 'email' => 'test@test.com',
-                 'password' => '12345678',
-             ]);
-     
-             $response->assertStatus(200)
-                      ->assertJsonStructure(['token'])
-                      ->assertJsonStructure(['user'])
-                      ->assertJson([
-                        "error" => false,
-                    ]);;
+                ]
+            ]);
+
+            $user = User::factory()->create([
+                "email" => 'test@test.com',
+                "name" => "test",
+                "password" => Hash::make("12345678"),
+            ]);
+
+
+            $tasks = Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+
+            $taskId = $tasks->first()->id; 
+            $token = JWTAuth::fromUser($user);
+
+            $response = $this->withHeaders([
+                'token' => $token
+            ])->delete("/api/v1/tasks/$taskId");
+
+
+            $response->assertStatus(200)
+            ->assertJson([
+                "error" => false,
+            ]);
         }
-                    */
 
 }
