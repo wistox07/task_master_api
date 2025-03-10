@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: tasks_master_api_container
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html/task_master_api
+    depends_on:
+      - db
+    networks:
+      - my_network
+
+  db:
+    image: mysql:8.0.30
+    container_name: tasks_master_api_mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tasks_project
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my_network
+
+networks:
+  my_network: 
+    driver : bridge
+
+volumes:
+  mysql_data: 
