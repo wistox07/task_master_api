@@ -13,6 +13,13 @@ RUN apt-get update && apt-get install -y \
 # Habilitar mod_rewrite para Laravel
 RUN a2enmod rewrite
 
+# Copiar configuración personalizada de Apache
+COPY docker_files/apache/api_task_master.conf /etc/apache2/sites-available/
+
+# Deshabilitar configuración por defecto y habilitar la nueva
+RUN a2dissite 000-default.conf && a2ensite api_task_master.conf
+
+
 # Instala Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
