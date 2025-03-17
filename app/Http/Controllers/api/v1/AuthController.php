@@ -118,6 +118,8 @@ class AuthController extends Controller
             ], 400);
         }
 
+        //dd("gato");
+
         $email = $request->input("email");
         $password = $request->input("password");
 
