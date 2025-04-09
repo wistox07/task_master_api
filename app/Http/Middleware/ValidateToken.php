@@ -23,35 +23,34 @@ class ValidateToken
     {
         try {
             $token = $request->header("token");
-            if(!$token){
+            if (!$token) {
                 return response()->json([
                     "error" => true,
                     "message" => "Token no enviado",
                     "message_detail" => "Es necesario enviar el token para continuar con el proceso"
-                ],400);
+                ], 400);
             }
 
             $payload = JWTAuth::setToken($token)->getPayload();
             return $next($request);
-
-        }catch (TokenExpiredException $e) {
+        } catch (TokenExpiredException $e) {
             return response()->json([
                 "error" => true,
                 "message" => "Token expirado",
                 "message_detail" => "El Token enviado ya ha expirado , por favor intente loguearse nuevamente"
-            ],401);
+            ], 401);
         } catch (TokenInvalidException $e) {
             return response()->json([
                 "error" => true,
                 "message" => "Token invalido",
                 "message_detail" => "El Token enviado ya es invalido , por favor envie un token correcto"
-            ],401);
+            ], 401);
         } catch (Throwable $e) {
             return response()->json([
                 "error" => true,
                 "message" => "Problema en validación de token",
                 "message_detail" => $e->getMessage()
-            ],500);
+            ], 500);
         }
     }
 }
