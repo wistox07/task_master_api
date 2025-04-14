@@ -18,6 +18,7 @@ class TaskResource extends JsonResource
             "id" => $this->id,
             "title" => $this->title,
             "description" => $this->description,
+            "created_date" => $this->created_at->format('Y-m-d H:i:s'),
             "expiration_date" => $this->expiration_date,
             "status" => $this->status->name, // Evita error si no hay status
             "user" => $this->user->name, // Evita error si no hay usuario

@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,6 +32,17 @@ class DatabaseSeeder extends Seeder
 
             ]
             ]);
+
+        User::factory()->create([
+            "name" => "admin",
+            "email" => "admin@gmail.com",
+            "password" => Hash::make('12345678')
+        ])->each(function ($user){
+            Task::factory(10)->create([
+                "user_id" => $user->id,
+                "status_id" => Status::inRandomOrder()->first()->id
+            ]);
+        });
         
     
 

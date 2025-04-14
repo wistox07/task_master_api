@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\v1\AuthController;
+use App\Http\Controllers\api\v1\StatusController;
 use App\Http\Controllers\api\v1\TaskController;
 use App\Http\Controllers\api\v1\UserController;
 use GuzzleHttp\Middleware;
@@ -30,5 +31,6 @@ Route::prefix("v1")->group(function () {
     Route::middleware('validate.token')->group(function () {
         Route::get("tasks/me", [TaskController::class, 'listTasks']);
         Route::apiResource('/tasks', TaskController::class);
+        Route::get("tasks/statuses", [StatusController::class, 'listStatuses']);
     });
 });

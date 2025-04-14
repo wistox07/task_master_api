@@ -63,53 +63,87 @@ class TaskController extends Controller
      *                 type="array",
      *                 @OA\Items(ref="#/components/schemas/Task")
 
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Usuario no autorizado o no encontrado",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Usuario no encontrado"),
-     *             @OA\Property(property="message_detail", type="string", example="No fue posible encontrar al usuario logueado")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Error interno del servidor",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="error", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Error al listar tareas"),
-     *             @OA\Property(property="message_detail", type="string", example="Detalles del error interno")
-     *         )
-     *     )
-     * 
-     * )
-     * @OA\Schema(
-     *     schema="Task",
-     *     type="object",
-     *     title="Tarea",
-     *     description="Estructura de una tarea",
-     *     @OA\Property(property="id", type="integer", example=1),
-     *     @OA\Property(property="title", type="string", example="Deserunt ut."),
-     *     @OA\Property(property="description", type="string", example="Descripción de la tarea."),
-     *     @OA\Property(property="expiration_date", type="string", format="date", example="2025-03-29"),
-     *     @OA\Property(property="status", type="string", example="Pendiente"),
-     *     @OA\Property(property="user", type="string", example="Lucy West")
-     * )
-     */
+ *             )
+ *         )
+ *     ),
+ *  *     @OA\Response(
+ *         response=400,
+ *         description="Error en validación",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="error", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Error en validación"),
+ *             @OA\Property(
+ *                 property="message_detail",
+ *                 type="array",
+ *                 @OA\Items(type="string"),
+ *                 example={
+ *                     "El campo per_page es obligatorio.",
+ *                     "El campo page es obligatorio."
+ *                 }
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Usuario no autorizado o no encontrado",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="error", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Usuario no encontrado"),
+ *             @OA\Property(property="message_detail", type="string", example="No fue posible encontrar al usuario logueado")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Error interno del servidor",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="error", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Error al listar tareas"),
+ *             @OA\Property(property="message_detail", type="string", example="Detalles del error interno")
+ *         )
+ *     )
+ * 
+ * )
+ * @OA\Schema(
+ *     schema="Task",
+ *     type="object",
+ *     title="Tarea",
+ *     description="Estructura de una tarea",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="title", type="string", example="Deserunt ut."),
+ *     @OA\Property(property="description", type="string", example="Descripción de la tarea."),
+ *     @OA\Property(property="created_date", type="string",  format="date-time", example="2025-03-29 14:30:00"),
+ *     @OA\Property(property="expiration_date", type="string", format="date", example="2025-03-29"),
+ *     @OA\Property(property="status", type="string", example="Pendiente"),
+ *     @OA\Property(property="user", type="string", example="Lucy West")
+ * )
+ */
 
     public function listTasks(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            "page" => "required|integer|min:1",
+            "per_page" => 'required|integer|min:1|max:1000'
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                "error" => true,
+                "message" => "Error en validación",
+                "message_detail" => $validator->errors()->all()
+            ],400);
+        }
 
         //$perPage = $request->input('per_page', 10);
 
         try {
 
             $token = $request->header("token");
+            $page = $request->input("page");
+            $perPage = $request->input("per_page");
+
             $payload = JWTAuth::setToken($token)->getPayload();
             $userIdLogued = $payload->get("sub");
 
@@ -122,10 +156,7 @@ class TaskController extends Controller
                 ], 404);
             }
 
-            $tasks = $user->tasks()->with('status')
-                ->whereBetween('created_at', ["2025-04-01", "2025-04-30"])
-                ->paginate(10);
-
+            $tasks = $user->tasks()->with('status')->paginate($perPage);
             return response()->json([
                 "error" => false,
                 "message" => "Lista de tareas obtenidas correctamente",
@@ -135,8 +166,6 @@ class TaskController extends Controller
                     "last_page" => $tasks->lastPage(),
                     "per_page" => $tasks->perPage(),
                     "total" => $tasks->total(),
-                    "next_page_url" => $tasks->nextPageUrl(),
-                    "prev_page_url" => $tasks->previousPageUrl(),
                 ]
             ]);
         } catch (Throwable $ex) {

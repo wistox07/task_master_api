@@ -375,6 +375,36 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Error en validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en validación"
+                                        },
+                                        "message_detail": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "example": [
+                                                "El campo per_page es obligatorio.",
+                                                "El campo page es obligatorio."
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Usuario no autorizado o no encontrado",
                         "content": {
@@ -990,6 +1020,11 @@
                     "description": {
                         "type": "string",
                         "example": "Descripción de la tarea."
+                    },
+                    "created_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-03-29 14:30:00"
                     },
                     "expiration_date": {
                         "type": "string",
