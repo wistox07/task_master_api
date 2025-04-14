@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StatusResource;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -26,7 +27,7 @@ class StatusController extends Controller
             return response()->json([
                 "error" => false,
                 "message" => "Lista de estados obtenidas correctamente",
-                "tasks" => $statuses
+                "tasks" => StatusResource::collection($statuses)
             ]);
 
         } catch (Throwable $ex) {

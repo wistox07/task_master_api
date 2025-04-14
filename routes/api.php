@@ -30,7 +30,7 @@ Route::prefix("v1")->group(function () {
 
     Route::middleware('validate.token')->group(function () {
         Route::get("tasks/me", [TaskController::class, 'listTasks']);
-        Route::apiResource('/tasks', TaskController::class);
         Route::get("tasks/statuses", [StatusController::class, 'listStatuses']);
+        Route::apiResource('/tasks', TaskController::class);
     });
 });
