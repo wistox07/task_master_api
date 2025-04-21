@@ -12,7 +12,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class StatusController extends Controller
 {
-    public function listStatuses(Request $request){
+    public function listStatuses(Request $request)
+    {
         try {
 
             $statuses = Status::all();
@@ -27,9 +28,8 @@ class StatusController extends Controller
             return response()->json([
                 "error" => false,
                 "message" => "Lista de estados obtenidas correctamente",
-                "tasks" => StatusResource::collection($statuses)
+                "statuses" => StatusResource::collection($statuses)
             ]);
-
         } catch (Throwable $ex) {
             return response()->json([
                 "error" => true,
@@ -38,5 +38,4 @@ class StatusController extends Controller
             ], 500);
         }
     }
-
 }
